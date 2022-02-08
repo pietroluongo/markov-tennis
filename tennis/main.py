@@ -3,6 +3,8 @@ main.py
 ====================================
 O módulo principal do projeto
 """
+import networkx as nx
+import matplotlib.pyplot as plt
 from markov import MarkovNode
 
 
@@ -19,7 +21,26 @@ def main():
         print("building", nodeData, "w/ key", key)
         MarkovNode.setNodeData(data)
         MarkovNode._nodes[key] = MarkovNode.requestNode(key)
-    print("nodes are ", MarkovNode._nodes)
+    graph = nx.DiGraph()
+    # drawNodeData = list(map(apply, MarkovNode._nodes.values()))
+    drawNodeData = []
+    for node in MarkovNode._nodes.values():
+        if node == None:
+            return []
+        if node._nodeP != None:
+            drawNodeData.append(
+                (node._name, node._nodeP._name, {"weight": node._probP})
+            )
+        if node._nodeQ != None:
+            drawNodeData.append(
+                (node._name, node._nodeQ._name, {"weight": node._probQ})
+            )
+    print(drawNodeData)
+    graph.add_edges_from(drawNodeData)
+    nx.draw_networkx_edge_labels(graph, pos=nx.planar_layout(graph))
+    nx.draw(graph, pos=nx.planar_layout(graph), with_labels=True)
+    plt.show()
+
     pass
 
 
