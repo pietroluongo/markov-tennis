@@ -5,22 +5,57 @@ O módulo principal do projeto
 """
 import networkx as nx
 import matplotlib.pyplot as plt
+import csv
+from pprint import pprint
 from markov import MarkovNode
+
+# data = {
+#     "A": {"probP": 0.1, "probQ": 0.2, "nodeP": "B", "nodeQ": "C"},
+#     "B": {"probP": 0.3, "probQ": 0.4, "nodeP": "D", "nodeQ": "E"},
+#     "C": {"probP": 0.5, "probQ": 0.6, "nodeP": "D", "nodeQ": "E"},
+#     "D": {"probP": 0.5, "probQ": 0.6, "nodeP": None, "nodeQ": None},
+#     "E": {"probP": 0.5, "probQ": 0.6, "nodeP": None, "nodeQ": None},
+# }
+
+
+def loadData(path: str):
+    data = {}
+    with open(path, "r") as csvFile:
+        csvReader = csv.reader(csvFile, delimiter=",")
+        lineCount = 0
+        for row in csvReader:
+            lineCount += 1
+            if lineCount == 1:
+                pass
+            else:
+                nodeP = None
+                nodeQ = None
+                if row[3] != "":
+                    nodeP = row[3]
+                if row[4] != "":
+                    nodeQ = row[4]
+                data[row[0]] = {
+                    "probP": 0,
+                    "probQ": 0,
+                    "nodeP": nodeP,
+                    "nodeQ": nodeQ,
+                }
+    csvFile.close()
+    return data
 
 
 def main():
-    data = {
-        "A": {"probP": 0.1, "probQ": 0.2, "nodeP": "B", "nodeQ": "C"},
-        "B": {"probP": 0.3, "probQ": 0.4, "nodeP": "D", "nodeQ": "E"},
-        "C": {"probP": 0.5, "probQ": 0.6, "nodeP": "D", "nodeQ": "E"},
-        "D": {"probP": 0.5, "probQ": 0.6, "nodeP": None, "nodeQ": None},
-        "E": {"probP": 0.5, "probQ": 0.6, "nodeP": None, "nodeQ": None},
-    }
+    data = loadData("tennis/stateList.csv")
     for key in data:
-        nodeData = data[key]
-        print("building", nodeData, "w/ key", key)
-        MarkovNode.setNodeData(data)
-        MarkovNode._nodes[key] = MarkovNode.requestNode(key)
+        MarkovNode(
+            key,
+            data[key]["probP"],
+            data[key]["probQ"],
+            data[key]["nodeP"],
+            data[key]["nodeQ"],
+        )
+    MarkovNode.populateNodes()
+
     graph = nx.DiGraph()
     # drawNodeData = list(map(apply, MarkovNode._nodes.values()))
     drawNodeData = []

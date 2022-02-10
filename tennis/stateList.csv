@@ -1,18 +1,18 @@
 nodeName,p,q,pWinsNode,qWinsNode
-A Wins,,,A Wins, A Wins
-B Wins,,,B Wins, B Wins
+AWins,,,,
+BWins,,,,
 0-0,,,15-Love,Love-15
 15-Love,,,30-Love,15-15
 30-Love,,,40-Love,30-15
-40-Love,,,A Wins,40-15
+40-Love,,,AWins,40-15
 15-15,,,30-15,15-30
 30-15,,,40-15,Deuce
 15-30,,,Deuce,15-40
-Deuce,,,Adv A, Adv, B
-Adv A,,,A Wins, Deuce
-Adv B,,,B Wins, Deuce
+AdvA,,,AWins,Deuce
+AdvB,,,BWins,Deuce
 Love-15,,,15-15,Love-30
 Love-30,,,15-30,Love-40
-Love-40,,,15-40,B Wins
-40-15,,,A Wins, Adv A
-15-40,,,B Wins, Adv B
+Love-40,,,15-40,BWins
+40-15,,,AWins,AdvA
+15-40,,,BWins,AdvB
+Deuce,,,AdvA,AdvB

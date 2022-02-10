@@ -26,21 +26,36 @@ class MarkovNode:
             nodeList (List[MarkovNode]): A lista de nós.
         """
         self._name = name
+
         self._probP = probP
         self._probQ = probQ
-        if nodeP != None:
-            self._nodeP = MarkovNode.requestNode(nodeP)
-        else:
-            self._nodeP = None
-        if nodeQ != None:
-            self._nodeQ = MarkovNode.requestNode(nodeQ)
-        else:
-            self._nodeQ = None
+
+        self._nodeP = nodeP
+        self._nodeQ = nodeQ
+
+        MarkovNode._nodes[name] = self
+        # if nodeP != None:
+        #     self._nodeP = MarkovNode.requestNode(nodeP)
+        # else:
+        #     self._nodeP = None
+        # if nodeQ != None:
+        #     self._nodeQ = MarkovNode.requestNode(nodeQ)
+        # else:
+        #     self._nodeQ = None
 
     def __str__(self):
+        nodeP = None
+        nodeQ = None
+        if self._nodeP != None:
+            nodeP = self._nodeP._name
+        if self._nodeQ != None:
+            nodeQ = self._nodeQ._name
         return "({name}: ({NodeQ}, {NodeP}))".format(
-            name=self._name, NodeP=self._nodeP, NodeQ=self._nodeQ
+            name=self._name, NodeP=nodeP, NodeQ=nodeQ
         )
+
+    def updateNode(node):
+        MarkovNode._nodes[node] = node
 
     def requestNode(node: str):
         print("building node", node)
@@ -64,3 +79,16 @@ class MarkovNode:
 
     def setNodeData(nodeData):
         MarkovNode._originalNodeData = nodeData
+
+    def populateNodes():
+        for key in MarkovNode._nodes:
+            nodePName = MarkovNode._nodes[key]._nodeP
+            nodeQName = MarkovNode._nodes[key]._nodeQ
+            if nodePName != None:
+                MarkovNode._nodes[key]._nodeP = MarkovNode._nodes[nodePName]
+            if nodeQName != None:
+                MarkovNode._nodes[key]._nodeQ = MarkovNode._nodes[nodeQName]
+
+    def debug():
+        for key in MarkovNode._nodes:
+            print(MarkovNode._nodes[key])
