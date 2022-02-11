@@ -9,6 +9,7 @@ import csv
 from pprint import pprint
 from markov import MarkovNode
 
+
 # data = {
 #     "A": {"probP": 0.1, "probQ": 0.2, "nodeP": "B", "nodeQ": "C"},
 #     "B": {"probP": 0.3, "probQ": 0.4, "nodeP": "D", "nodeQ": "E"},
@@ -35,13 +36,35 @@ def loadData(path: str):
                 if row[4] != "":
                     nodeQ = row[4]
                 data[row[0]] = {
-                    "probP": 0,
-                    "probQ": 0,
+                    "probP": row[1],
+                    "probQ": row[2],
                     "nodeP": nodeP,
                     "nodeQ": nodeQ,
                 }
     csvFile.close()
     return data
+
+
+def drawNodes():
+    graph = nx.DiGraph()
+    drawNodeData = []
+    for node in MarkovNode.getNodes():
+        if node == None:
+            return []
+        if node._nodeP != None:
+            drawNodeData.append(
+                (node.getName(), node._nodeP.getName(), {"weight": node.getProbP()})
+            )
+        if node._nodeQ != None:
+            drawNodeData.append(
+                (node.getName(), node._nodeQ.getName(), {"weight": node.getProbQ()})
+            )
+    print(drawNodeData)
+    graph.add_edges_from(drawNodeData)
+    nx.draw_networkx_edge_labels(graph, pos=nx.planar_layout(graph))
+    nx.draw(graph, pos=nx.planar_layout(graph), with_labels=True)
+    plt.show()
+    return
 
 
 def main():
@@ -55,27 +78,7 @@ def main():
             data[key]["nodeQ"],
         )
     MarkovNode.populateNodes()
-
-    graph = nx.DiGraph()
-    # drawNodeData = list(map(apply, MarkovNode._nodes.values()))
-    drawNodeData = []
-    for node in MarkovNode._nodes.values():
-        if node == None:
-            return []
-        if node._nodeP != None:
-            drawNodeData.append(
-                (node._name, node._nodeP._name, {"weight": node._probP})
-            )
-        if node._nodeQ != None:
-            drawNodeData.append(
-                (node._name, node._nodeQ._name, {"weight": node._probQ})
-            )
-    print(drawNodeData)
-    graph.add_edges_from(drawNodeData)
-    nx.draw_networkx_edge_labels(graph, pos=nx.planar_layout(graph))
-    nx.draw(graph, pos=nx.planar_layout(graph), with_labels=True)
-    plt.show()
-
+    drawNodes()
     pass
 
 

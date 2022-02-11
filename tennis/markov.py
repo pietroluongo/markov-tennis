@@ -5,13 +5,16 @@ import numpy as np
 from typing import List, Type
 
 
+overridenProbabilityP = 0.5
+overridenProbabilityQ = 0.5
+
+
 class MarkovNode:
     """
     A classe que representa um determinado nó no grafo de Markov.
     """
 
     _nodes = {}
-    _originalNodeData = {}
 
     def __init__(self, name, probP, probQ, nodeP: str, nodeQ: str):
         """
@@ -23,7 +26,6 @@ class MarkovNode:
             probQ (float): A probabilidade de Q vencer.
             nodeP (MarkovNode): O nó associado à vitória de P.
             nodeQ (MarkovNode): O nó Q à vitória de Q.
-            nodeList (List[MarkovNode]): A lista de nós.
         """
         self._name = name
 
@@ -34,14 +36,6 @@ class MarkovNode:
         self._nodeQ = nodeQ
 
         MarkovNode._nodes[name] = self
-        # if nodeP != None:
-        #     self._nodeP = MarkovNode.requestNode(nodeP)
-        # else:
-        #     self._nodeP = None
-        # if nodeQ != None:
-        #     self._nodeQ = MarkovNode.requestNode(nodeQ)
-        # else:
-        #     self._nodeQ = None
 
     def __str__(self):
         nodeP = None
@@ -54,33 +48,44 @@ class MarkovNode:
             name=self._name, NodeP=nodeP, NodeQ=nodeQ
         )
 
-    def updateNode(node):
-        MarkovNode._nodes[node] = node
+    def getProbP(self):
+        """
+        Retorna a probabilidade de vitória de P.
+        """
+        if overridenProbabilityP != None:
+            return overridenProbabilityP
+        return self._probP
 
-    def requestNode(node: str):
-        print("building node", node)
-        if not node:
-            return MarkovNode(None, None, None, None, None)
-        if node in MarkovNode._nodes:
-            print("node", node, "already exists")
-            return MarkovNode._nodes[node]
-        print("creating node with id", node)
-        assert node != None
-        nodeP: str = MarkovNode._originalNodeData[node]["nodeP"]
-        nodeQ: str = MarkovNode._originalNodeData[node]["nodeQ"]
-        MarkovNode._nodes[node] = MarkovNode(
-            node,
-            MarkovNode._originalNodeData[node]["probP"],
-            MarkovNode._originalNodeData[node]["probQ"],
-            MarkovNode.requestNode(nodeP)._name,
-            MarkovNode.requestNode(nodeQ)._name,
-        )
-        return MarkovNode._nodes[node]
+    def getProbQ(self):
+        """
+        Retorna a probabilidade de vitória de Q.
+        """
+        if overridenProbabilityQ != None:
+            return overridenProbabilityQ
+        return self._probQ
 
-    def setNodeData(nodeData):
-        MarkovNode._originalNodeData = nodeData
+    def getName(self):
+        """
+        Retorna o nome (identificador) do nó.
+        """
+        return self._name
+
+    def updateProbP(self, probP):
+        """
+        Atualiza a probabilidade de vitória de P.
+        """
+        self._probP = probP
+
+    def updateProbQ(self, probQ):
+        """
+        Atualiza a probabilidade de vitória de Q.
+        """
+        self._probQ = probQ
 
     def populateNodes():
+        """
+        Popula os nós do grafo de Markov.
+        """
         for key in MarkovNode._nodes:
             nodePName = MarkovNode._nodes[key]._nodeP
             nodeQName = MarkovNode._nodes[key]._nodeQ
@@ -92,3 +97,9 @@ class MarkovNode:
     def debug():
         for key in MarkovNode._nodes:
             print(MarkovNode._nodes[key])
+
+    def getNodes():
+        """
+        Retorna os nós registrados no grafo de Markov.
+        """
+        return list(MarkovNode._nodes.values())
