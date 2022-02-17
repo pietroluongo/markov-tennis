@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 import csv
 from pprint import pprint
 from markov import MarkovNode
-
+from gui import MainWindow
+from PyQt5.QtWidgets import QApplication
 
 # data = {
 #     "A": {"probP": 0.1, "probQ": 0.2, "nodeP": "B", "nodeQ": "C"},
@@ -78,7 +79,11 @@ def main():
             data[key]["nodeQ"],
         )
     MarkovNode.populateNodes()
-    drawNodes()
+    # drawNodes()
+    app = QApplication([])
+    window = MainWindow()
+    window.show()
+    app.exec()
     pass
 
 
