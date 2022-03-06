@@ -17,6 +17,15 @@ from time import time, strftime
 
 
 def loadData(path: str):
+    """
+    Carrega os dados de geração do grafo de Markov a partir de um arquivo CSV.
+    A ordem de colunas do arquivo deve ser a seguinte:
+        - nodeName (string): identificador do nó
+        - p (float): probabilidade de vitória de P
+        - q (float): probabilidade de vitória de Q
+        - pWinsNode (string): identificador do nó associado à vitória de P
+        - qWinsNode (string): identificador do nó associado à vitória de Q
+    """
     data = {}
     with open(path, "r") as csvFile:
         csvReader = csv.reader(csvFile, delimiter=",")
@@ -43,6 +52,9 @@ def loadData(path: str):
 
 
 def drawNodes():
+    """
+    Desenha uma representação gráfica do grafo de Markov. Usado apenas para fins de depuração.
+    """
     graph = nx.DiGraph()
     drawNodeData = []
     for node in MarkovNode.getNodes():
@@ -65,6 +77,9 @@ def drawNodes():
 
 
 def drawUI():
+    """
+    Desenha a interface gráfica do programa. Não implementado.
+    """
     app = QApplication([])
     window = MainWindow()
     window.show()
@@ -72,16 +87,35 @@ def drawUI():
 
 
 def simulateGame():
+    """Simula um game. Um game é composto por um conjunto de seis ou sete sets."""
     # simulate six or seven sets
     pass
 
 
 def getSeedFromTime():
+    """
+    Função auxiliar usada para obter um seed para o gerador de números aleatórios a partir
+    do tempo atual.
+
+    Returns:
+        (int) tempo atual em milissegundos
+    """
     return round(time() * 1000)
 
 
 class TennisGame:
+    """
+    Classe que representa um Game (conjunto de sets) de Tênis.
+    """
+
     def __init__(self, set: Type[MarkovGraph]):
+        """
+        Inicializa o jogo.
+
+        Args:
+            set (`tennis.markov.MarkovGraph`): Conjunto de informações que representam um set.
+                Já deve estar completamente inicializado.
+        """
         self._scoreP = 0
         self._scoreQ = 0
         self._matches = []
@@ -91,6 +125,12 @@ class TennisGame:
         self._gameResults = []
 
     def simulate(self):
+        """
+        Simula um game - ou seja, um conjunto de sets. Os jogos são simulados até que um dos
+        jogadores atinja ao menos seis sets E uma diferença de ao menos dois sets em relação ao
+        seu adversário. O valor da variável de instância `_winner` indica o vencedor do game ao
+        fim da execução do método, e pode ser acessada via `getWinner`
+        """
         while True:
             self._set.simulateGame()
             winner = self._set.getWinner()
@@ -111,7 +151,35 @@ class TennisGame:
         else:
             self._winner = "q"
 
+    def getWinner(self):
+        """
+        Retorna o vencedor do game atual.
+
+        Returns:
+            (str): "p", se o vencedor for P, e "q", se o vencedor for Q
+        """
+        return self._winner
+
     def getJSON(self):
+        """
+        Retorna uma representação em JSON dos dados do game atual.
+
+        Formato:
+
+            O objeto retornado segue o seguinte formato:
+
+                {
+                    data: vetor de dados retornados dos sets - ver comentário abaixo,
+                    gameResult: {
+                        score: {
+                            p (int): pontuação de P,
+                            q (int): pontuação de Q
+                        }
+                    },
+                    winner (str): "p" se o vencedor for P, e "q" se o vencedor for Q
+                }
+            A estrutura de `data` é descrita em detalhes em `tennis.markov.MarkovGraph.getResults`.
+        """
         return {
             "data": self._gameResults,
             "gameResult": {
@@ -124,6 +192,10 @@ class TennisGame:
         }
 
     def dumpResultsToFile(self):
+        """
+        Escreve os dados do game atual em um arquivo JSON, no caminho `/results/games/data-hora-do-jogo.json`.
+        A formatação do arquivo é descrita em `getJSON`.
+        """
         currentTime = strftime("%Y-%m-%d-%H-%M-%S")
         if not os.path.exists("results"):
             os.mkdir("results")
@@ -137,6 +209,9 @@ class TennisGame:
 
 
 def simulateMatch():
+    """
+    Simula uma partida - ou seja, um conjunto de jogos.
+    """
     # simulate
     pass
 

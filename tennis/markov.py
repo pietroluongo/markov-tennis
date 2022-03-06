@@ -141,7 +141,7 @@ class MarkovGraph:
         """
         Salva os resultados do set no arquivo de log.
 
-        O arquivo de log é armazenado em `/results/sets/data_hora_do_jogo.json`
+        O arquivo de log é armazenado em `/results/sets/data-hora-do-jogo.json`
 
         A função é encarregada de criar o caminho, caso ele não exista.
         """
