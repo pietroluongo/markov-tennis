@@ -31,7 +31,6 @@ class MarkovGraph:
         if nodeP == None or nodeQ == None:
             return
         result = random()
-        print("Random: " + str(result))
         if result < self._currentNode.getProbP():
             self._currentNode = nodeP
             self._pScore += 1
@@ -41,7 +40,6 @@ class MarkovGraph:
         currentLogData["resultValue"] = result
         currentLogData["partialResults"] = "{}-{}".format(self._pScore, self._qScore)
         self._logFileData.append(currentLogData)
-        print("Next node: " + self._currentNode.__str__())
 
     def getCurrentNode(self):
         return self._currentNode
@@ -51,15 +49,23 @@ class MarkovGraph:
         while nodeP != None and nodeQ != None:
             self.getNextNode()
             (nodeP, nodeQ) = self._currentNode.getNextNodes()
-        print("Game ended. Last node was: ", self._currentNode.__str__())
-        print("Game Score: " + str(self._pScore) + "-" + str(self._qScore))
-        pprint(self._logFileData)
+        # print("Game ended. Last node was: ", self._currentNode.__str__())
+        # print("Game Score: " + str(self._pScore) + "-" + str(self._qScore))
         if shouldDumpResultsToFile:
             self.dumpResultsToFile()
 
+    def getWinner(self):
+        return "p" if self._pScore > self._qScore else "q"
+
+    def getResults(self):
+        return {
+            "data": self._logFileData,
+            "setResult": {"p": self._pScore, "q": self._qScore},
+            "winner": "p" if self._pScore > self._qScore else "q",
+        }
+
     def dumpResultsToFile(self):
         currentTime = strftime("%Y-%m-%d-%H-%M-%S")
-        print(currentTime)
         if not os.path.exists("results"):
             os.mkdir("results")
         if not os.path.exists(os.path.join("results", "sets")):
@@ -68,15 +74,14 @@ class MarkovGraph:
         with open(
             os.path.join("results", "sets", "{}.json".format(currentTime)), "w"
         ) as logFile:
-            logFile.write(
-                json.dumps(
-                    {
-                        "data": self._logFileData,
-                        "result": {"p": self._pScore, "q": self._qScore},
-                        "winner": "p" if self._pScore > self._qScore else "q",
-                    }
-                )
-            )
+            logFile.write(self.getResults())
+
+    def reset(self, tgtSeed):
+        self._currentNode = self._initialNode
+        self._pScore = 0
+        self._qScore = 0
+        self._logFileData = []
+        seed(tgtSeed)
 
 
 class MarkovNode:
