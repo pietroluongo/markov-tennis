@@ -10,6 +10,7 @@ from pprint import pprint
 from markov import MarkovGraph, MarkovNode
 from gui import MainWindow
 from PyQt5.QtWidgets import QApplication
+import time
 
 
 def loadData(path: str):
@@ -79,9 +80,10 @@ def main():
         )
     MarkovNode.populateNodes()
     initialNode = MarkovNode.getNodeById("0-0")
-    print(initialNode)
-    graph = MarkovGraph(initialNode, 12345)
-    graph.simulateGame()
+    simTime = round(time.time() * 1000)
+    print("Simulating game with seed {}".format(simTime))
+    graph = MarkovGraph(initialNode, simTime)
+    graph.simulateGame(True)
     pass
 
 

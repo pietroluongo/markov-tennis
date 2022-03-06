@@ -4,6 +4,11 @@ Este arquivo define a classe "Markov", que representa um modelo de Markov genér
 import numpy as np
 from typing import List, Type
 from random import seed, random
+import json
+from time import strftime, time, ctime
+import os
+
+from pprint import pprint
 
 overridenProbabilityP = 0.5
 overridenProbabilityQ = 0.5
@@ -14,33 +19,64 @@ class MarkovGraph:
         self._initialNode = initialNode
         self._currentNode = initialNode
         self._seed = tgtSeed
+        self._pScore = 0
+        self._qScore = 0
+        self._logFileData = []
         seed(tgtSeed)
 
     def getNextNode(self):
-        print("Current node: ")
-        print(self._currentNode)
+        currentLogData = {}
         (nodeP, nodeQ) = self._currentNode.getNextNodes()
-        print("NodeP: " + nodeP.__str__())
-        print("NodeQ: " + nodeQ.__str__())
+        currentLogData["originalNode"] = self._currentNode.toJson()
         if nodeP == None or nodeQ == None:
             return
         result = random()
         print("Random: " + str(result))
         if result < self._currentNode.getProbP():
             self._currentNode = nodeP
+            self._pScore += 1
         else:
             self._currentNode = nodeQ
+            self._qScore += 1
+        currentLogData["resultValue"] = result
+        currentLogData["partialResults"] = "{}-{}".format(self._pScore, self._qScore)
+        self._logFileData.append(currentLogData)
         print("Next node: " + self._currentNode.__str__())
 
     def getCurrentNode(self):
         return self._currentNode
 
-    def simulateGame(self):
+    def simulateGame(self, shouldDumpResultsToFile=False):
         (nodeP, nodeQ) = self._currentNode.getNextNodes()
         while nodeP != None and nodeQ != None:
             self.getNextNode()
             (nodeP, nodeQ) = self._currentNode.getNextNodes()
         print("Game ended. Last node was: ", self._currentNode.__str__())
+        print("Game Score: " + str(self._pScore) + "-" + str(self._qScore))
+        pprint(self._logFileData)
+        if shouldDumpResultsToFile:
+            self.dumpResultsToFile()
+
+    def dumpResultsToFile(self):
+        currentTime = strftime("%Y-%m-%d-%H-%M-%S")
+        print(currentTime)
+        if not os.path.exists("results"):
+            os.mkdir("results")
+        if not os.path.exists(os.path.join("results", "sets")):
+            os.mkdir(os.path.join("results", "sets"))
+
+        with open(
+            os.path.join("results", "sets", "{}.json".format(currentTime)), "w"
+        ) as logFile:
+            logFile.write(
+                json.dumps(
+                    {
+                        "data": self._logFileData,
+                        "result": {"p": self._pScore, "q": self._qScore},
+                        "winner": "p" if self._pScore > self._qScore else "q",
+                    }
+                )
+            )
 
 
 class MarkovNode:
@@ -145,3 +181,10 @@ class MarkovNode:
         if self._nodeP == None or self._nodeQ == None:
             return (None, None)
         return (self._nodeP, self._nodeQ)
+
+    def toJson(self):
+        return {
+            "selfNode": self._name,
+            "nodeP": self._nodeP._name if self._nodeP != None else None,
+            "nodeQ": self._nodeQ._name if self._nodeQ != None else None,
+        }
