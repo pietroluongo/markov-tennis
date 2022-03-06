@@ -3,10 +3,44 @@ Este arquivo define a classe "Markov", que representa um modelo de Markov genér
 """
 import numpy as np
 from typing import List, Type
-
+from random import seed, random
 
 overridenProbabilityP = 0.5
 overridenProbabilityQ = 0.5
+
+
+class MarkovGraph:
+    def __init__(self, initialNode, tgtSeed):
+        self._initialNode = initialNode
+        self._currentNode = initialNode
+        self._seed = tgtSeed
+        seed(tgtSeed)
+
+    def getNextNode(self):
+        print("Current node: ")
+        print(self._currentNode)
+        (nodeP, nodeQ) = self._currentNode.getNextNodes()
+        print("NodeP: " + nodeP.__str__())
+        print("NodeQ: " + nodeQ.__str__())
+        if nodeP == None or nodeQ == None:
+            return
+        result = random()
+        print("Random: " + str(result))
+        if result < self._currentNode.getProbP():
+            self._currentNode = nodeP
+        else:
+            self._currentNode = nodeQ
+        print("Next node: " + self._currentNode.__str__())
+
+    def getCurrentNode(self):
+        return self._currentNode
+
+    def simulateGame(self):
+        (nodeP, nodeQ) = self._currentNode.getNextNodes()
+        while nodeP != None and nodeQ != None:
+            self.getNextNode()
+            (nodeP, nodeQ) = self._currentNode.getNextNodes()
+        print("Game ended. Last node was: ", self._currentNode.__str__())
 
 
 class MarkovNode:
@@ -103,3 +137,11 @@ class MarkovNode:
         Retorna os nós registrados no grafo de Markov.
         """
         return list(MarkovNode._nodes.values())
+
+    def getNodeById(id: str):
+        return MarkovNode._nodes[id]
+
+    def getNextNodes(self):
+        if self._nodeP == None or self._nodeQ == None:
+            return (None, None)
+        return (self._nodeP, self._nodeQ)

@@ -7,17 +7,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import csv
 from pprint import pprint
-from markov import MarkovNode
+from markov import MarkovGraph, MarkovNode
 from gui import MainWindow
 from PyQt5.QtWidgets import QApplication
-
-# data = {
-#     "A": {"probP": 0.1, "probQ": 0.2, "nodeP": "B", "nodeQ": "C"},
-#     "B": {"probP": 0.3, "probQ": 0.4, "nodeP": "D", "nodeQ": "E"},
-#     "C": {"probP": 0.5, "probQ": 0.6, "nodeP": "D", "nodeQ": "E"},
-#     "D": {"probP": 0.5, "probQ": 0.6, "nodeP": None, "nodeQ": None},
-#     "E": {"probP": 0.5, "probQ": 0.6, "nodeP": None, "nodeQ": None},
-# }
 
 
 def loadData(path: str):
@@ -68,6 +60,13 @@ def drawNodes():
     return
 
 
+def drawUI():
+    app = QApplication([])
+    window = MainWindow()
+    window.show()
+    app.exec()
+
+
 def main():
     data = loadData("tennis/stateList.csv")
     for key in data:
@@ -79,11 +78,10 @@ def main():
             data[key]["nodeQ"],
         )
     MarkovNode.populateNodes()
-    # drawNodes()
-    app = QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec()
+    initialNode = MarkovNode.getNodeById("0-0")
+    print(initialNode)
+    graph = MarkovGraph(initialNode, 12345)
+    graph.simulateGame()
     pass
 
 
