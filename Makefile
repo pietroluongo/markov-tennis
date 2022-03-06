@@ -4,7 +4,10 @@ all:
 	python tennis/main.py
 
 docs:
-	pdoc -o ./docs tennis
+	PYTHONPATH=./tennis pdoc -o ./docs tennis -d google
+
+docs-live:
+	PYTHONPATH=./tennis pdoc --host localhost tennis -d google
 
 init:
 	pip requirements.txt
