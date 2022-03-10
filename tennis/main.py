@@ -13,6 +13,8 @@ from PyQt5.QtWidgets import QApplication
 from typing import Type
 import os
 from time import time, strftime
+import argparse
+import json
 
 
 def loadData(path: str):
@@ -141,9 +143,6 @@ class TennisSet:
             if self._scoreQ == 2:
                 self._winner = "q"
                 self._shouldRun = False
-        print(
-            "{} won the set by {}-{}".format(self._winner, self._scoreP, self._scoreQ)
-        )
 
     def getWinner(self):
         """
@@ -175,7 +174,7 @@ class TennisSet:
             A estrutura de `data` é descrita em detalhes em `tennis.markov.MarkovGraph.getResults`.
         """
         return {
-            "data": self._gameResults,
+            "setData": self._gameResults,
             "setResult": {
                 "score": {
                     "p": self._scoreP,
@@ -246,11 +245,6 @@ class TennisMatch:
                 self._scoreP += 1
             else:
                 self._scoreQ += 1
-            print(
-                "{} won match. current match score: {} - {}".format(
-                    winner, self._scoreP, self._scoreQ
-                )
-            )
             self._sets.append(self._set.getJSON())
             self._set.reset()
             if self._scoreP == 2:
@@ -284,7 +278,7 @@ class TennisMatch:
         """
         return {
             "seed": self._graph.getSeed(),
-            "data": self._sets,
+            "matchData": self._sets,
             "matchResult": {
                 "score": {
                     "p": self._scoreP,
@@ -311,7 +305,7 @@ class TennisMatch:
             ),
             "w",
         ) as outputFile:
-            outputFile.write(self.toJSON().__str__())
+            outputFile.write(json.dumps(self.toJSON()))
             TennisMatch.idx += 1
 
     def getWinner(self):
@@ -324,27 +318,92 @@ class TennisMatch:
         return self._winner
 
 
-def main():
-    data = loadData("tennis/stateList.csv")
-    for key in data:
-        MarkovNode(
-            key,
-            data[key]["probP"],
-            data[key]["probQ"],
-            data[key]["nodeP"],
-            data[key]["nodeQ"],
+def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
+    if shouldSimulate:
+        data = loadData("tennis/stateList.csv")
+        for key in data:
+            MarkovNode(
+                key,
+                data[key]["probP"],
+                data[key]["probQ"],
+                data[key]["nodeP"],
+                data[key]["nodeQ"],
+            )
+        MarkovNode.populateNodes()
+        initialNode = MarkovNode.getNodeById("0-0")
+        for i in range(0, 400):
+            simTime = getSeedFromTime(i + 1)
+            print("Simulating game with seed {}".format(simTime))
+            graph = MarkovGraph(initialNode, simTime)
+            match = TennisMatch(graph)
+            match.simulate(True)
+    if shouldAnalyze:
+        datasetFiles = os.listdir(datasetPath)
+        dataset = []
+        for file in datasetFiles:
+            with open(os.path.join(datasetPath, file), "r") as inputFile:
+                data = json.loads(inputFile.read())
+                dataset.append(data)
+
+        rands = []
+        setCount = 0
+        gameCount = 0
+        pointCount = 0
+        pWinsMatch = list(filter(lambda x: x["matchResult"]["winner"] == "p", dataset))
+
+        for element in dataset:
+            for setData in element["matchData"]:
+                setCount += 1
+                for gameData in setData["setData"]:
+                    gameCount += 1
+                    pointCount += len(gameData["gameData"])
+                    for point in gameData["gameData"]:
+                        rands.append(point["resultValue"])
+                    pass
+
+        print("total de sets: {}".format(setCount))
+        print("total de jogos: {}".format(gameCount))
+        print("total de pontos: {}".format(pointCount))
+
+        med = sum(rands) / len(rands)
+        print("media: {}".format(med))
+        print(
+            "p ganha em média {} de {} partidas, {}%".format(
+                len(pWinsMatch), len(dataset), len(pWinsMatch) / len(dataset) * 100
+            )
         )
-    MarkovNode.populateNodes()
-    initialNode = MarkovNode.getNodeById("0-0")
-    for i in range(0, 40):
-        simTime = getSeedFromTime(i + 1)
-        print("Simulating game with seed {}".format(simTime))
-        graph = MarkovGraph(initialNode, simTime)
-        match = TennisMatch(graph)
-        match.simulate(True)
+        dp = (sum(list(map(lambda x: (x - med) ** 2, rands))) / len(rands)) ** 0.5
+        print("desvio padrão: {}".format(dp))
+        print("em média, cada partida tem {} pontos".format(pointCount / setCount))
+        print("em média, cada jogo tem {} pontos".format(pointCount / gameCount))
+        print("em média, cada set tem {} jogos".format(gameCount / setCount))
 
-    pass
 
+parser = argparse.ArgumentParser(
+    description="Simulação de partidas de tênis usando Cadeias de Markov"
+)
+parser.add_argument(
+    "--simulate",
+    "-S",
+    action="store_true",
+    help="Simula uma partida de tênis",
+)
+parser.add_argument(
+    "--analyze",
+    "-A",
+    action="store_true",
+    help="Analisa os resultados de uma partida armazenados em um dataset",
+)
+parser.add_argument("--path", "-p", help="Caminho para a pasta contendo o dataset")
+args = parser.parse_args()
 
 if __name__ == "__main__":
-    main()
+    if args.analyze and not args.path:
+        print("É necessário informar o caminho para o dataset")
+        exit(1)
+    if args.analyze and args.simulate:
+        print(
+            "Não é possível gerar os dados e simular uma partida ao mesmo tempo. Faça a simulação primeiro e depois analise os resultados."
+        )
+        exit(1)
+    main(args.simulate, args.analyze, args.path)

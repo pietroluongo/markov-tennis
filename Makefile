@@ -1,7 +1,7 @@
 .PHONY: all docs init clean
 
 all:
-	python tennis/main.py
+	python tennis/main.py --simulate
 
 docs:
 	PYTHONPATH=./tennis pdoc -o ./docs tennis -d google
@@ -14,3 +14,6 @@ init:
 
 clean:
 	rm -rf docs results
+
+dev:
+	python tennis/main.py --analyze --path ./results/matches/dataset1

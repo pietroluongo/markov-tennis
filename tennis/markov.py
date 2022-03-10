@@ -9,8 +9,8 @@ import os
 
 from pprint import pprint
 
-overridenProbabilityP = 0.78
-overridenProbabilityQ = 1 - overridenProbabilityP
+overridenProbabilityP = 0.8
+overridenProbabilityQ = 0.2
 
 
 class MarkovGraph:
@@ -167,7 +167,6 @@ class MarkovGraph:
                 do usado originalmente, para evitar que o gerador de números aleatórios gere
                 os mesmos resultados.
         """
-        print("markov with seed ", tgtSeed)
         self._currentNode = self._initialNode
         self._pScore = 0
         self._qScore = 0
@@ -282,10 +281,6 @@ class MarkovNode:
                 MarkovNode._nodes[key]._nodeP = MarkovNode._nodes[nodePName]
             if nodeQName != None:
                 MarkovNode._nodes[key]._nodeQ = MarkovNode._nodes[nodeQName]
-
-    # def debug():
-    #     for key in MarkovNode._nodes:
-    #         print(MarkovNode._nodes[key])
 
     def getNodes():
         """
