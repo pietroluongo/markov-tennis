@@ -13,4 +13,4 @@ init:
 	pip requirements.txt
 
 clean:
-	rm -rf docs
+	rm -rf docs results

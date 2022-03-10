@@ -9,8 +9,8 @@ import os
 
 from pprint import pprint
 
-overridenProbabilityP = 0.5
-overridenProbabilityQ = 0.5
+overridenProbabilityP = 0.78
+overridenProbabilityQ = 1 - overridenProbabilityP
 
 
 class MarkovGraph:
@@ -54,14 +54,18 @@ class MarkovGraph:
         if nodeP == None or nodeQ == None:
             return
         result = random()
+        scorer = ""
         if result < self._currentNode.getProbP():
             self._currentNode = nodeP
             self._pScore += 1
+            scorer = "p"
         else:
             self._currentNode = nodeQ
             self._qScore += 1
+            scorer = "q"
         currentLogData["resultValue"] = result
         currentLogData["partialResults"] = "{}-{}".format(self._pScore, self._qScore)
+        currentLogData["scorer"] = scorer
         self._logFileData.append(currentLogData)
 
     def getCurrentNode(self):
@@ -169,6 +173,15 @@ class MarkovGraph:
         self._qScore = 0
         self._logFileData = []
         seed(tgtSeed)
+
+    def getSeed(self):
+        """
+        Retorna o seed usado para gerar os números aleatórios.
+
+        Returns:
+            int: Seed usado para gerar os números aleatórios.
+        """
+        return self._seed
 
 
 class MarkovNode:
