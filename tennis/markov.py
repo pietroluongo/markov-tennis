@@ -2,10 +2,9 @@
 Este arquivo define a classe "Markov", que representa um modelo de Markov genérico.
 """
 import numpy as np
-from typing import List, Type
 from random import seed, random
 import json
-from time import strftime, time, ctime
+from time import strftime
 import os
 
 from pprint import pprint
@@ -22,10 +21,10 @@ class MarkovGraph:
         - Criação dos nós da classe `MarkovNode`;
         - Instanciação da classe `MarkovGraph` usando o `MarkovNode` inicial como parâmetro
         e um valor aleatório como tgtSeed (sugestão: tempo atual em milissegundos);
-        - Chamada de `simulateGame` para simular um set;
+        - Chamada de `simulateGame` para simular um game;
         - Chamada de `getResults` para obter os resultados em JSON, ou passar `True` para
         `simulateGame` no passo anterior para salvar os resultados em JSON de forma automática;
-        - Chamada de `reset` para reiniciar o modelo para um novo set.
+        - Chamada de `reset` para reiniciar o modelo para um novo game.
     """
 
     def __init__(self, initialNode, tgtSeed):
@@ -76,9 +75,9 @@ class MarkovGraph:
 
     def simulateGame(self, shouldDumpResultsToFile=False):
         """
-        Simula um set do jogo de tênis.
+        Simula um game do jogo de tênis.
         Args:
-            shouldDumpResultsToFile (bool): Se True, salva os resultados do set no arquivo de log.
+            shouldDumpResultsToFile (bool): Se True, salva os resultados do game no arquivo de log.
                 Os detalhes sobre o log estão descritos em `MarkovGraph.dumpResultsToFile`.
         """
         (nodeP, nodeQ) = self._currentNode.getNextNodes()
@@ -90,16 +89,16 @@ class MarkovGraph:
 
     def getWinner(self):
         """
-        Retorna o vencedor do set.
+        Retorna o vencedor do game.
 
         Returns:
-            str: "p" se o jogador P venceu o set, "q" se o jogador Q venceu o set.
+            str: "p" se o jogador P venceu o game, "q" se o jogador Q venceu o game.
         """
         return "p" if self._pScore > self._qScore else "q"
 
     def getResults(self):
         """
-        Retorna os resultados do set formatados em JSON.
+        Retorna os resultados do game formatados em JSON.
 
         Formato:
 
@@ -107,18 +106,18 @@ class MarkovGraph:
         O objeto retornado por este método possui a seguinte estrutura interna:
 
             {
-                data: dados dos pontos do set
-                setResult: resultado do Set
-                winner: vencedor do set
+                data: dados dos pontos do game
+                gameResult: resultado do game
+                winner: vencedor do game
             }
-        O formato do objeto `setResult` é o seguinte:
+        O formato do objeto `gameResult` é o seguinte:
 
             {
                 p: pontos do jogador P
                 q: pontos do jogador Q
             }
 
-        O formato de `winner` é uma string que pode ser "p" ou "q", indicando o vencedor do set.
+        O formato de `winner` é uma string que pode ser "p" ou "q", indicando o vencedor do game.
 
         O objeto ``data`` tem a estrutura:
 
@@ -132,38 +131,39 @@ class MarkovGraph:
         O formato do objeto "originalNode" é descrito no método `MarkovNode.toJson`.
         """
         return {
-            "data": self._logFileData,
-            "setResult": {"p": self._pScore, "q": self._qScore},
-            "winner": "p" if self._pScore > self._qScore else "q",
+            "gameData": self._logFileData,
+            "gameResult": {"p": self._pScore, "q": self._qScore},
+            "gameWinner": "p" if self._pScore > self._qScore else "q",
         }
 
     def dumpResultsToFile(self):
         """
         Salva os resultados do set no arquivo de log.
 
-        O arquivo de log é armazenado em `/results/sets/data-hora-do-jogo.json`
+        O arquivo de log é armazenado em `/results/games/data-hora-do-jogo.json`
 
         A função é encarregada de criar o caminho, caso ele não exista.
         """
         currentTime = strftime("%Y-%m-%d-%H-%M-%S")
         if not os.path.exists("results"):
             os.mkdir("results")
-        if not os.path.exists(os.path.join("results", "sets")):
-            os.mkdir(os.path.join("results", "sets"))
+        if not os.path.exists(os.path.join("results", "games")):
+            os.mkdir(os.path.join("results", "games"))
 
         with open(
-            os.path.join("results", "sets", "{}.json".format(currentTime)), "w"
+            os.path.join("results", "games", "{}.json".format(currentTime)), "w"
         ) as logFile:
             logFile.write(self.getResults())
 
     def reset(self, tgtSeed):
         """
-        Reseta o modelo para um novo set.
+        Reseta o modelo para um novo game.
         Args:
             tgtSeed (int): Seed para o gerador de números aleatórios. Esse seed deve ser diferente
                 do usado originalmente, para evitar que o gerador de números aleatórios gere
                 os mesmos resultados.
         """
+        print("markov with seed ", tgtSeed)
         self._currentNode = self._initialNode
         self._pScore = 0
         self._qScore = 0

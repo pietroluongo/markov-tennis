@@ -6,13 +6,12 @@ O módulo principal do projeto
 import networkx as nx
 import matplotlib.pyplot as plt
 import csv
-from pprint import pprint
+
 from markov import MarkovGraph, MarkovNode
 from gui import MainWindow
 from PyQt5.QtWidgets import QApplication
 from typing import Type
 import os
-import json
 from time import time, strftime
 
 
@@ -92,7 +91,7 @@ def simulateGame():
     pass
 
 
-def getSeedFromTime():
+def getSeedFromTime(iter: int):
     """
     Função auxiliar usada para obter um seed para o gerador de números aleatórios a partir
     do tempo atual.
@@ -100,7 +99,7 @@ def getSeedFromTime():
     Returns:
         (int) tempo atual em milissegundos
     """
-    return round(time() * 1000)
+    return round(time() * 1000 * iter)
 
 
 class TennisSet:
@@ -123,6 +122,7 @@ class TennisSet:
         self._game = game
         self._results = {}
         self._gameResults = []
+        self._shouldRun = True
 
     def simulate(self):
         """
@@ -131,28 +131,27 @@ class TennisSet:
         seu adversário. O valor da variável de instância `_winner` indica o vencedor do game ao
         fim da execução do método, e pode ser acessada via `getWinner`
         """
-        while True:
+        while self._shouldRun:
             self._game.simulateGame()
             winner = self._game.getWinner()
             if winner == "p":
                 self._scoreP += 1
             else:
                 self._scoreQ += 1
-            print("current score: {} - {}".format(self._scoreP, self._scoreQ))
+            print(
+                "{} won set. current set score: {} - {}".format(
+                    winner, self._scoreP, self._scoreQ
+                )
+            )
             self._gameResults.append(self._game.getResults())
-            self._game.reset(getSeedFromTime())
-            # if self._scoreP >= 6 and self._scoreP >= self._scoreQ + 2:
-            #     break
-            # if self._scoreQ >= 6 and self._scoreQ >= self._scoreP + 2:
-            #     break
-            if(self._scoreP == 2):
+            self._game.reset(getSeedFromTime(self._scoreP + self._scoreQ))
+            if self._scoreP == 2:
                 self._winner = "p"
-                break
+                self._shouldRun = False
 
-            if(self._scoreQ == 2):
+            if self._scoreQ == 2:
                 self._winner = "q"
-                break
-
+                self._shouldRun = False
 
     def getWinner(self):
         """
@@ -210,13 +209,73 @@ class TennisSet:
         ) as outputFile:
             outputFile.write(self.getJSON().__str__())
 
+    def reset(self):
+        self._scoreP = 0
+        self._scoreQ = 0
+        self._matches = []
+        self._winner = None
+        self._gameResults = []
+        self._shouldRun = True
 
-def simulateMatch():
+
+class TennisMatch:
     """
     Simula uma partida - ou seja, um conjunto de sets.
     """
-    # simulate
-    pass
+
+    def __init__(self, graph: Type[MarkovGraph]):
+        self._winner = None
+        self._sets = []
+        self._set = TennisSet(graph)
+        self._results = {}
+        self._scoreP = 0
+        self._scoreQ = 0
+        self._graph = graph
+
+    def simulate(self):
+        while True:
+            self._set.simulate()
+            winner = self._set.getWinner()
+            if winner == "p":
+                self._scoreP += 1
+            else:
+                self._scoreQ += 1
+            print(
+                "{} won match. current match score: {} - {}".format(
+                    winner, self._scoreP, self._scoreQ
+                )
+            )
+            self._set.reset()
+            if self._scoreP == 2:
+                self._winner = "p"
+                break
+            if self._scoreQ == 2:
+                self._winner = "q"
+                break
+
+    def toJSON(self):
+        return {
+            "data": self._set.getJSON(),
+            "matchResult": {
+                "score": {
+                    "p": self._scoreP,
+                    "q": self._scoreQ,
+                },
+                "winner": "{}".format(self._winner),
+            },
+        }
+
+    def dumpToFile(self):
+        currentTime = strftime("%Y-%m-%d-%H-%M-%S")
+        if not os.path.exists("results"):
+            os.mkdir("results")
+        if not os.path.exists(os.path.join("results", "matches")):
+            os.mkdir(os.path.join("results", "matches"))
+
+        with open(
+            os.path.join("results", "matches", "{}.json".format(currentTime)), "w"
+        ) as outputFile:
+            outputFile.write(self.toJSON().__str__())
 
 
 def main():
@@ -231,13 +290,13 @@ def main():
         )
     MarkovNode.populateNodes()
     initialNode = MarkovNode.getNodeById("0-0")
-    simTime = getSeedFromTime()
+    simTime = getSeedFromTime(1)
     print("Simulating game with seed {}".format(simTime))
     graph = MarkovGraph(initialNode, simTime)
-    # graph.simulateGame(True)
-    set = TennisSet(graph)
-    set.simulate()
-    set.dumpResultsToFile()
+    match = TennisMatch(graph)
+    match.simulate()
+    match.dumpToFile()
+
     pass
 
 
