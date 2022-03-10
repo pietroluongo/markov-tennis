@@ -103,12 +103,12 @@ def getSeedFromTime():
     return round(time() * 1000)
 
 
-class TennisGame:
+class TennisSet:
     """
-    Classe que representa um Game (conjunto de sets) de Tênis.
+    Classe que representa um Set (conjunto de games) de Tênis.
     """
 
-    def __init__(self, set: Type[MarkovGraph]):
+    def __init__(self, game: Type[MarkovGraph]):
         """
         Inicializa o jogo.
 
@@ -120,7 +120,7 @@ class TennisGame:
         self._scoreQ = 0
         self._matches = []
         self._winner = None
-        self._set = set
+        self._game = game
         self._results = {}
         self._gameResults = []
 
@@ -132,24 +132,27 @@ class TennisGame:
         fim da execução do método, e pode ser acessada via `getWinner`
         """
         while True:
-            self._set.simulateGame()
-            winner = self._set.getWinner()
+            self._game.simulateGame()
+            winner = self._game.getWinner()
             if winner == "p":
                 self._scoreP += 1
             else:
                 self._scoreQ += 1
             print("current score: {} - {}".format(self._scoreP, self._scoreQ))
-            self._gameResults.append(self._set.getResults())
-            self._set.reset(getSeedFromTime())
-            if self._scoreP >= 6 and self._scoreP >= self._scoreQ + 2:
-                break
-            if self._scoreQ >= 6 and self._scoreQ >= self._scoreP + 2:
+            self._gameResults.append(self._game.getResults())
+            self._game.reset(getSeedFromTime())
+            # if self._scoreP >= 6 and self._scoreP >= self._scoreQ + 2:
+            #     break
+            # if self._scoreQ >= 6 and self._scoreQ >= self._scoreP + 2:
+            #     break
+            if(self._scoreP == 2):
+                self._winner = "p"
                 break
 
-        if self._scoreP > self._scoreQ:
-            self._winner = "p"
-        else:
-            self._winner = "q"
+            if(self._scoreQ == 2):
+                self._winner = "q"
+                break
+
 
     def getWinner(self):
         """
@@ -182,7 +185,7 @@ class TennisGame:
         """
         return {
             "data": self._gameResults,
-            "gameResult": {
+            "setResult": {
                 "score": {
                     "p": self._scoreP,
                     "q": self._scoreQ,
@@ -193,24 +196,24 @@ class TennisGame:
 
     def dumpResultsToFile(self):
         """
-        Escreve os dados do game atual em um arquivo JSON, no caminho `/results/games/data-hora-do-jogo.json`.
+        Escreve os dados do game atual em um arquivo JSON, no caminho `/results/sets/data-hora-do-jogo.json`.
         A formatação do arquivo é descrita em `getJSON`.
         """
         currentTime = strftime("%Y-%m-%d-%H-%M-%S")
         if not os.path.exists("results"):
             os.mkdir("results")
-        if not os.path.exists(os.path.join("results", "games")):
-            os.mkdir(os.path.join("results", "games"))
+        if not os.path.exists(os.path.join("results", "sets")):
+            os.mkdir(os.path.join("results", "sets"))
 
         with open(
-            os.path.join("results", "games", "{}.json".format(currentTime)), "w"
+            os.path.join("results", "sets", "{}.json".format(currentTime)), "w"
         ) as outputFile:
             outputFile.write(self.getJSON().__str__())
 
 
 def simulateMatch():
     """
-    Simula uma partida - ou seja, um conjunto de jogos.
+    Simula uma partida - ou seja, um conjunto de sets.
     """
     # simulate
     pass
@@ -232,9 +235,9 @@ def main():
     print("Simulating game with seed {}".format(simTime))
     graph = MarkovGraph(initialNode, simTime)
     # graph.simulateGame(True)
-    game = TennisGame(graph)
-    game.simulate()
-    game.dumpResultsToFile()
+    set = TennisSet(graph)
+    set.simulate()
+    set.dumpResultsToFile()
     pass
 
 

@@ -17,7 +17,7 @@ overridenProbabilityQ = 0.5
 class MarkovGraph:
     """
     Classe que representa um conjunto de nós de um modelo de Markov voltado para a
-    simulação de um set do jogo de tênis.
+    simulação de um game (conjunto de pontos) de tênis.
     O uso geral da classe segue o seguinte fluxo:
         - Criação dos nós da classe `MarkovNode`;
         - Instanciação da classe `MarkovGraph` usando o `MarkovNode` inicial como parâmetro
