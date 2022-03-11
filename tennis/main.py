@@ -5,6 +5,7 @@ O módulo principal do projeto
 """
 import networkx as nx
 import matplotlib.pyplot as plt
+import numpy as np
 import csv
 
 from markov import MarkovGraph, MarkovNode
@@ -476,6 +477,26 @@ def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
         print("em média, cada partida tem {} pontos".format(pointCount / setCount))
         print("em média, cada jogo tem {} pontos".format(pointCount / gameCount))
         print("em média, cada set tem {} jogos".format(gameCount / setCount))
+        fig1, ax1 = plt.subplots(1, 2)
+        ax1[0].set_title("Distribuição dos pontos de P ao longo das simulações")
+        ax1[1].set_title("Distribuição dos pontos de Q ao longo das simulações")
+        ax1[0].boxplot(pointCountForP, boxprops=dict(color="C0"))
+        ax1[1].boxplot(pointCountForQ, boxprops=dict(color="C2"))
+        plt.show()
+
+        fig2, ax2 = plt.subplots(1, 2)
+        ax2[0].set_title("Distribuição dos sets de P ao longo das simulações")
+        ax2[1].set_title("Distribuição dos sets de Q ao longo das simulações")
+        ax2[0].boxplot(setCountPerGameForP, boxprops=dict(color="C0"))
+        ax2[1].boxplot(setCountPerGameForQ, boxprops=dict(color="C2"))
+        plt.show()
+
+        fig3, ax3 = plt.subplots(1, 2)
+        ax3[0].set_title("Distribuição dos games de P ao longo das simulações")
+        ax3[1].set_title("Distribuição dos games de Q ao longo das simulações")
+        ax3[0].boxplot(gameCountForP, boxprops=dict(color="C0"))
+        ax3[1].boxplot(gameCountForQ, boxprops=dict(color="C2"))
+        plt.show()
 
 
 parser = argparse.ArgumentParser(
