@@ -136,11 +136,19 @@ class TennisSet:
                 self._scoreQ += 1
             self._gameResults.append(self._game.getResults())
             self._game.reset(getSeedFromTime(self._scoreP + self._scoreQ))
-            if self._scoreP == 2:
+            if self._scoreP > self._scoreQ + 2 and self._scoreP >= 6:
                 self._winner = "p"
                 self._shouldRun = False
 
-            if self._scoreQ == 2:
+            if self._scoreQ == 2 > self._scoreP + 2 and self._scoreQ >= 6:
+                self._winner = "q"
+                self._shouldRun = False
+
+            if self._scoreQ == 7:
+                self._winner = "p"
+                self._shouldRun = False
+
+            if self._scoreP == 7:
                 self._winner = "q"
                 self._shouldRun = False
 
@@ -319,6 +327,14 @@ class TennisMatch:
 
 
 def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
+    """
+    Função principal do programa.
+
+    Args:
+        shouldSimulate (bool): Se True, simula uma partida.
+        shouldAnalyze (bool): Se True, analisa os dados de um dataset.
+        datasetPath (str): Caminho para o dataset a ser analisado.
+    """
     if shouldSimulate:
         data = loadData("tennis/stateList.csv")
         for key in data:
@@ -331,7 +347,7 @@ def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
             )
         MarkovNode.populateNodes()
         initialNode = MarkovNode.getNodeById("0-0")
-        for i in range(0, 400):
+        for i in range(0, 1000):
             simTime = getSeedFromTime(i + 1)
             print("Simulating game with seed {}".format(simTime))
             graph = MarkovGraph(initialNode, simTime)
@@ -359,45 +375,44 @@ def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
                     pointCount += len(gameData["gameData"])
                     for point in gameData["gameData"]:
                         rands.append(point["resultValue"])
-                    pass
 
         print("total de sets: {}".format(setCount))
         print("total de jogos: {}".format(gameCount))
         print("total de pontos: {}".format(pointCount))
 
         med = sum(rands) / len(rands)
-        print("media: {}".format(med))
+        print("media dos numeros sorteados: {}".format(med))
         print(
             "p ganha em média {} de {} partidas, {}%".format(
                 len(pWinsMatch), len(dataset), len(pWinsMatch) / len(dataset) * 100
             )
         )
         dp = (sum(list(map(lambda x: (x - med) ** 2, rands))) / len(rands)) ** 0.5
-        print("desvio padrão: {}".format(dp))
+        print("desvio padrão dos numeros sorteados: {}".format(dp))
         print("em média, cada partida tem {} pontos".format(pointCount / setCount))
         print("em média, cada jogo tem {} pontos".format(pointCount / gameCount))
         print("em média, cada set tem {} jogos".format(gameCount / setCount))
 
 
-parser = argparse.ArgumentParser(
-    description="Simulação de partidas de tênis usando Cadeias de Markov"
-)
-parser.add_argument(
-    "--simulate",
-    "-S",
-    action="store_true",
-    help="Simula uma partida de tênis",
-)
-parser.add_argument(
-    "--analyze",
-    "-A",
-    action="store_true",
-    help="Analisa os resultados de uma partida armazenados em um dataset",
-)
-parser.add_argument("--path", "-p", help="Caminho para a pasta contendo o dataset")
-args = parser.parse_args()
+def main2():
+    parser = argparse.ArgumentParser(
+        description="Simulação de partidas de tênis usando Cadeias de Markov"
+    )
+    parser.add_argument(
+        "--simulate",
+        "-S",
+        action="store_true",
+        help="Simula uma partida de tênis",
+    )
+    parser.add_argument(
+        "--analyze",
+        "-A",
+        action="store_true",
+        help="Analisa os resultados de uma partida armazenados em um dataset",
+    )
+    parser.add_argument("--path", "-p", help="Caminho para a pasta contendo o dataset")
+    args = parser.parse_args()
 
-if __name__ == "__main__":
     if args.analyze and not args.path:
         print("É necessário informar o caminho para o dataset")
         exit(1)
@@ -407,3 +422,7 @@ if __name__ == "__main__":
         )
         exit(1)
     main(args.simulate, args.analyze, args.path)
+
+
+if __name__ == "__main__":
+    main2()

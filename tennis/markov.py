@@ -9,8 +9,8 @@ import os
 
 from pprint import pprint
 
-overridenProbabilityP = 0.8
-overridenProbabilityQ = 0.2
+overridenProbabilityP = 0.5
+overridenProbabilityQ = 1 - overridenProbabilityP
 
 
 class MarkovGraph:
