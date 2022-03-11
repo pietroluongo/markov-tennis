@@ -50,7 +50,7 @@ class MarkovGraph:
         """
         currentLogData = {}
         (nodeP, nodeQ) = self._currentNode.getNextNodes()
-        currentLogData["originalNode"] = self._currentNode.toJson()
+        currentLogData["originalNode"] = self._currentNode.toJSON()
         if nodeP == None or nodeQ == None:
             return
         result = random()
@@ -132,7 +132,7 @@ class MarkovGraph:
                 é a pontuação do jogador P e Y é a pontuação do jogador Q;
             }
 
-        O formato do objeto "originalNode" é descrito no método `MarkovNode.toJson`.
+        O formato do objeto "originalNode" é descrito no método `MarkovNode.toJSON`.
         """
         return {
             "gameData": self._logFileData,
@@ -313,7 +313,7 @@ class MarkovNode:
             return (None, None)
         return (self._nodeP, self._nodeQ)
 
-    def toJson(self):
+    def toJSON(self):
         """
         Converte as informações do nó para o formato JSON.
 
