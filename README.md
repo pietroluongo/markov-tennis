@@ -54,7 +54,7 @@ make docs
 
 para gerar arquivos .html estáticos com a documentação.
 
-Alternativamente, a documentação pré-compilada está disponível na pasta `docs`.
+Alternativamente, a documentação pré-compilada está disponível na pasta `docs`, ou hosteada online [nesta página](https://pietroluongo.github.io/markov-tennis/tennis.html).
 
 ## Apresentação
 
