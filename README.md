@@ -56,6 +56,8 @@ para gerar arquivos .html estáticos com a documentação.
 
 Alternativamente, a documentação pré-compilada está disponível na pasta `docs`, ou hosteada online [nesta página](https://pietroluongo.github.io/markov-tennis/tennis.html).
 
-## Apresentação
+## Apresentação & Análise
 
 Uma apresentação em vídeo da metodologia usada para implementar o projeto está disponível [neste link](https://youtu.be/ZCesdYXqfso).
+
+A análise dos resultados obtidos está detalhada na [página de resultados da Wiki](https://github.com/pietroluongo/markov-tennis/wiki/An%C3%A1lise-e-Resultados).
