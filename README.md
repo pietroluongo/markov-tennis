@@ -55,3 +55,7 @@ make docs
 para gerar arquivos .html estáticos com a documentação.
 
 Alternativamente, a documentação pré-compilada está disponível na pasta `docs`.
+
+## Apresentação
+
+Uma apresentação em vídeo da metodologia usada para implementar o projeto está disponível [neste link](https://youtu.be/ZCesdYXqfso).
