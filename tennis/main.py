@@ -52,9 +52,13 @@ def loadData(path: str):
     return data
 
 
-def mainSimulate():
+def mainSimulate(simulationCount: int):
     """
     Carrega os dados, constrói a cadeia de Markov e simula um jogo de tênis.
+
+    Args:
+        simulationCount (int): Quantidade de partidas a serem simuladas.
+
     """
     data = loadData("tennis/stateList.csv")
     for key in data:
@@ -67,7 +71,7 @@ def mainSimulate():
         )
     MarkovNode.populateNodes()
     initialNode = MarkovNode.getNodeById("0-0")
-    for i in range(0, 300):
+    for i in range(0, simulationCount):
         simTime = getSeedFromTime(i + 1)
         print("Simulating game with seed {}".format(simTime))
         graph = MarkovGraph(initialNode, simTime)
@@ -221,7 +225,11 @@ def generateStats(datasetPath: str, shouldShowGraphs: bool):
 
 
 def main(
-    shouldSimulate=False, shouldAnalyze=False, datasetPath=None, shouldShowGraphs=False
+    shouldSimulate=False,
+    shouldAnalyze=False,
+    datasetPath=None,
+    shouldShowGraphs=False,
+    simulationCount=30,
 ):
     """
     Função principal do programa.
@@ -229,33 +237,47 @@ def main(
     Args:
         shouldSimulate (bool): Se True, simula uma partida.
         shouldAnalyze (bool): Se True, analisa os dados de um dataset.
-        datasetPath (str): Caminho para o dataset a ser analisado.
+        datasetPath (str): Caminho para o dataset a ser analisado.]
+        shouldShowGraphs (bool): Se True, mostra os gráficos gerados.
     """
     if shouldSimulate:
-        mainSimulate()
+        mainSimulate(simulationCount)
     if shouldAnalyze:
         generateStats(datasetPath, shouldShowGraphs)
 
 
 def checkArgs():
-
+    """
+    Verifica se os argumentos passados são válidos.
+    """
     parser = argparse.ArgumentParser(
         description="Simulação de partidas de tênis usando Cadeias de Markov"
     )
+
     parser.add_argument(
         "--simulate",
         "-S",
         action="store_true",
         help="Simula uma partida de tênis",
     )
+
     parser.add_argument(
         "--analyze",
         "-A",
         action="store_true",
         help="Analisa os resultados de uma partida armazenados em um dataset",
     )
+
     parser.add_argument(
         "--no-graphs", action="store_true", help="Não gera gráficos dos resultados"
+    )
+
+    parser.add_argument(
+        "--simulation-count",
+        "-C",
+        type=int,
+        default=30,
+        help="Quantidade de partidas a serem simuladas",
     )
 
     parser.add_argument("--path", "-p", help="Caminho para a pasta contendo o dataset")
@@ -273,4 +295,10 @@ def checkArgs():
 
 if __name__ == "__main__":
     args = checkArgs()
-    main(args.simulate, args.analyze, args.path, not args.no_graphs)
+    main(
+        args.simulate,
+        args.analyze,
+        args.path,
+        not args.no_graphs,
+        args.simulation_count,
+    )
