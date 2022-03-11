@@ -140,7 +140,7 @@ class TennisSet:
                 self._winner = "p"
                 self._shouldRun = False
 
-            if self._scoreQ == 2 > self._scoreP + 2 and self._scoreQ >= 6:
+            if self._scoreQ > self._scoreP + 2 and self._scoreQ >= 6:
                 self._winner = "q"
                 self._shouldRun = False
 
@@ -394,25 +394,26 @@ def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
         print("em média, cada set tem {} jogos".format(gameCount / setCount))
 
 
-def main2():
-    parser = argparse.ArgumentParser(
-        description="Simulação de partidas de tênis usando Cadeias de Markov"
-    )
-    parser.add_argument(
-        "--simulate",
-        "-S",
-        action="store_true",
-        help="Simula uma partida de tênis",
-    )
-    parser.add_argument(
-        "--analyze",
-        "-A",
-        action="store_true",
-        help="Analisa os resultados de uma partida armazenados em um dataset",
-    )
-    parser.add_argument("--path", "-p", help="Caminho para a pasta contendo o dataset")
-    args = parser.parse_args()
+parser = argparse.ArgumentParser(
+    description="Simulação de partidas de tênis usando Cadeias de Markov"
+)
+parser.add_argument(
+    "--simulate",
+    "-S",
+    action="store_true",
+    help="Simula uma partida de tênis",
+)
+parser.add_argument(
+    "--analyze",
+    "-A",
+    action="store_true",
+    help="Analisa os resultados de uma partida armazenados em um dataset",
+)
+parser.add_argument("--path", "-p", help="Caminho para a pasta contendo o dataset")
+args = parser.parse_args()
 
+
+if __name__ == "__main__":
     if args.analyze and not args.path:
         print("É necessário informar o caminho para o dataset")
         exit(1)
@@ -422,7 +423,3 @@ def main2():
         )
         exit(1)
     main(args.simulate, args.analyze, args.path)
-
-
-if __name__ == "__main__":
-    main2()
