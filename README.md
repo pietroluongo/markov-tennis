@@ -53,3 +53,5 @@ make docs
 ```
 
 para gerar arquivos .html estáticos com a documentação.
+
+Alternativamente, a documentação pré-compilada está disponível na pasta `docs`.
