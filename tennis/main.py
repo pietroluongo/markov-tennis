@@ -98,6 +98,15 @@ def getSeedFromTime(iter: int):
     return round(time() * 1000 * iter)
 
 
+def mean(list):
+    return sum(list) / len(list)
+
+
+def dp(list):
+    iMean = mean(list)
+    return (sum([(x - iMean) ** 2 for x in list]) / len(list)) ** 0.5
+
+
 class TennisSet:
     """
     Classe que representa um Set (conjunto de games) de Tênis.
@@ -347,7 +356,7 @@ def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
             )
         MarkovNode.populateNodes()
         initialNode = MarkovNode.getNodeById("0-0")
-        for i in range(0, 1000):
+        for i in range(0, 300):
             simTime = getSeedFromTime(i + 1)
             print("Simulating game with seed {}".format(simTime))
             graph = MarkovGraph(initialNode, simTime)
@@ -363,18 +372,91 @@ def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
 
         rands = []
         setCount = 0
+        setCountPerGameForP = []
+        setCountPerGameForQ = []
         gameCount = 0
+        gameCountForP = []
+        gameCountForQ = []
         pointCount = 0
+        pointCountForP = []
+        pointCountForQ = []
         pWinsMatch = list(filter(lambda x: x["matchResult"]["winner"] == "p", dataset))
 
-        for element in dataset:
-            for setData in element["matchData"]:
+        splitGames = []
+
+        for i in range(0, len(dataset), 3):
+            splitGames.append(dataset[i : i + 3])
+
+        print(splitGames[0][0]["matchResult"]["winner"])
+        pGroupWinsData = []
+        qGroupWinsData = []
+        for threeGames in splitGames:
+            p = 0
+            q = 0
+            for singleGame in threeGames:
+                if singleGame["matchResult"]["winner"] == "p":
+                    p += 1
+                else:
+                    q += 1
+            pGroupWinsData.append(p)
+            qGroupWinsData.append(q)
+
+        print("P wins mean = {}".format(mean(pGroupWinsData)))
+        print("Q wins mean = {}".format(mean(qGroupWinsData)))
+
+        print("P wins dp = {}".format(dp(pGroupWinsData)))
+        print("Q wins dp = {}".format(dp(qGroupWinsData)))
+
+        for match in dataset:
+            pSet = 0
+            qSet = 0
+            pGame = 0
+            qGame = 0
+            pPoint = 0
+            qPoint = 0
+            for setData in match["matchData"]:
                 setCount += 1
+                if setData["setResult"]["winner"] == "p":
+                    pSet += 1
+                else:
+                    qSet += 1
                 for gameData in setData["setData"]:
                     gameCount += 1
+                    if gameData["gameWinner"] == "p":
+                        pGame += 1
+                    else:
+                        qGame += 1
                     pointCount += len(gameData["gameData"])
                     for point in gameData["gameData"]:
+                        if point["scorer"] == "p":
+                            pPoint += 1
+                        else:
+                            qPoint += 1
                         rands.append(point["resultValue"])
+            setCountPerGameForP.append(pSet)
+            setCountPerGameForQ.append(qSet)
+            gameCountForP.append(pGame)
+            gameCountForQ.append(qGame)
+            pointCountForP.append(pPoint)
+            pointCountForQ.append(qPoint)
+
+        print("media de pontos de P por partida = {}".format(mean(pointCountForP)))
+        print("media de pontos de Q por partida = {}".format(mean(pointCountForQ)))
+
+        print("dp de pontos de P por partida = {}".format(dp(pointCountForP)))
+        print("dp de pontos de Q por partida = {}".format(dp(pointCountForQ)))
+
+        print("media de sets de P por partida = {}".format(mean(setCountPerGameForP)))
+        print("media de sets de Q por partida = {}".format(mean(setCountPerGameForQ)))
+
+        print("dp de sets de P por partida = {}".format(dp(setCountPerGameForP)))
+        print("dp de sets de Q por partida = {}".format(dp(setCountPerGameForQ)))
+
+        print("media de games de P por partida = {}".format(mean(gameCountForP)))
+        print("media de games de Q por partida = {}".format(mean(gameCountForQ)))
+
+        print("dp de games de P por partida = {}".format(dp(gameCountForP)))
+        print("dp de games de Q por partida = {}".format(dp(gameCountForQ)))
 
         print("total de sets: {}".format(setCount))
         print("total de jogos: {}".format(gameCount))
@@ -387,8 +469,10 @@ def main(shouldSimulate=False, shouldAnalyze=False, datasetPath=None):
                 len(pWinsMatch), len(dataset), len(pWinsMatch) / len(dataset) * 100
             )
         )
-        dp = (sum(list(map(lambda x: (x - med) ** 2, rands))) / len(rands)) ** 0.5
-        print("desvio padrão dos numeros sorteados: {}".format(dp))
+        randomValsDP = (
+            sum(list(map(lambda x: (x - med) ** 2, rands))) / len(rands)
+        ) ** 0.5
+        print("desvio padrão dos numeros sorteados: {}".format(randomValsDP))
         print("em média, cada partida tem {} pontos".format(pointCount / setCount))
         print("em média, cada jogo tem {} pontos".format(pointCount / gameCount))
         print("em média, cada set tem {} jogos".format(gameCount / setCount))
